@@ -39,8 +39,9 @@ ENV/
 database/fitcoach.db
 fitcoach.db
 
-# Streamlit config
-.streamlit/
+# Streamlit secrets (keep config.toml tracked for cloud deployment)
+.streamlit/secrets.toml
+.streamlit/*.local.toml
 
 # Testing & Coverage
 .pytest_cache/

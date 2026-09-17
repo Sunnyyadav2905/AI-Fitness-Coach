@@ -396,32 +396,58 @@ tests/test_validators.py::test_specific_metrics_validation PASSED        [100%]
 
 ## ☁️ Cloud Deployment Guide
 
-### Option A: Deploy on Streamlit Community Cloud (Recommended)
-1. Push this repository to GitHub.
-2. Visit [share.streamlit.io](https://share.streamlit.io/) and log in with your GitHub account.
-3. Click **New App**, select your repository, branch (`main`), and set the main file path to `app.py`.
-4. In **Advanced Settings**, add your environment variables under **Secrets**:
+> [!NOTE]
+> **Hosting Architecture Note (Vercel vs. Streamlit):**  
+> Vercel is a serverless platform optimized for static sites and stateless HTTP/WSGI functions (Next.js, Flask, FastAPI). Vercel attempts to load `app.py` as an ephemeral Serverless Function looking for an exported `app` or `handler` variable.  
+> However, **Streamlit is a stateful, long-running Python process** that relies on persistent bidirectional **WebSockets** (`/_stcore/stream`), in-memory session states (`st.session_state`), and local database transactions. It cannot run inside Vercel's 10-second stateless serverless containers.  
+> To run Streamlit in production, use platforms built for stateful web apps: **Streamlit Community Cloud** (official & free) or **Render** (containerized web service).
+
+### Option A: Deploy on Streamlit Community Cloud (Recommended — Free & Instant)
+
+Streamlit Community Cloud is the official, zero-configuration hosting platform built specifically for Streamlit apps.
+
+1. Push your repository to GitHub: `https://github.com/Sunnyyadav2905/AI-Fitness-Coach`
+2. Go to **[share.streamlit.io](https://share.streamlit.io/)** and sign in with your GitHub account.
+3. Click **"New app"** (or **"Create app"**).
+4. Fill in the deployment fields:
+   * **Repository:** `Sunnyyadav2905/AI-Fitness-Coach`
+   * **Branch:** `main`
+   * **Main file path:** `app.py`
+   * **App URL:** (Choose your custom subdomain, e.g. `ai-fitness-coach.streamlit.app`)
+5. *(Optional)* Click **"Advanced settings"** -> **"Secrets"**, and add your OpenAI key if you want live GPT-4o-mini generation enabled globally:
    ```toml
-   OPENAI_API_KEY = "your-openai-api-key-here"
+   OPENAI_API_KEY = "sk-..."
    APP_ENV = "production"
    ```
-5. Click **Deploy**. Streamlit Cloud will automatically build and host the application.
+   *(Note: If omitted, the app still runs 100% smoothly using the built-in Smart Offline Metabolic Engine!)*
+6. Click **"Deploy!"** Your app will be live with an SSL HTTPS link in ~1-2 minutes.
 
-### Option B: Deploy on Render
-1. Connect your GitHub repository to [Render](https://render.com/).
-2. Create a new **Web Service**.
-3. Select **Python 3** environment.
-4. Set **Build Command**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-5. Set **Start Command**:
-   ```bash
-   streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
-   ```
-   *(Or Render will automatically detect the included `Procfile`)*.
-6. Under **Environment Variables**, add `OPENAI_API_KEY`.
-7. Click **Create Web Service**.
+---
+
+### Option B: Deploy on Render (Web Service / Blueprints)
+
+Render provides persistent cloud containers with native WebSocket support.
+
+#### Method 1: Using the Included Blueprint (`render.yaml`)
+1. Sign in to **[render.com](https://render.com/)**.
+2. Click **"New +"** -> **"Blueprint"**.
+3. Select your repository `Sunnyyadav2905/AI-Fitness-Coach`.
+4. Render will automatically read `render.yaml`, configure Python 3.11.8, install `requirements.txt`, and start the app with:
+   `streamlit run app.py --server.port=$PORT --server.address=0.0.0.0`
+5. Click **"Apply"**.
+
+#### Method 2: Manual Web Service Setup
+1. Click **"New +"** -> **"Web Service"**.
+2. Connect your GitHub repository `Sunnyyadav2905/AI-Fitness-Coach`.
+3. Set the following fields:
+   * **Environment:** `Python 3`
+   * **Build Command:** `pip install -r requirements.txt`
+   * **Start Command:** `streamlit run app.py --server.port=$PORT --server.address=0.0.0.0`
+4. Under **Environment Variables**, add:
+   * `PYTHON_VERSION`: `3.11.8`
+   * `APP_ENV`: `production`
+   * `OPENAI_API_KEY`: (Optional) `sk-...`
+5. Click **"Create Web Service"**.
 
 ---
 
