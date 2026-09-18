@@ -1,11 +1,11 @@
 """
 ai/chatbot.py - Conversational Fitness Assistant for AI-FitCoach
-Provides interactive fitness coaching, form tips, and nutrition advice using OpenAI GPT.
+Provides interactive fitness coaching, form tips, and nutrition advice using Google Gemini API.
 Maintains chat history and safely redirects medical queries.
 """
 
 from typing import List, Dict, Any, Optional, Tuple
-from ai.openai_client import generate_completion, CHATBOT_SYSTEM_PROMPT
+from ai.gemini_client import generate_completion, CHATBOT_SYSTEM_PROMPT
 from database import db
 
 
@@ -41,7 +41,7 @@ def chat_with_coach(
     Handles user interaction with the AI fitness chatbot:
     1. Checks for safety/medical emergency keywords.
     2. Retrieves recent conversation history.
-    3. Builds message context and queries OpenAI.
+    3. Builds message context and queries Google Gemini API.
     4. Persists the conversation turn to SQLite.
     Returns (success: bool, coach_reply: str).
     """
@@ -72,7 +72,7 @@ def chat_with_coach(
         f"[Client Context: Name={name}, Goal={goal}, Weight={weight}kg, Activity={activity}]"
     )
 
-    # Format messages array for OpenAI
+    # Format messages array for Google Gemini
     api_messages = [{"role": "system", "content": f"{CHATBOT_SYSTEM_PROMPT}\n\n{context_prompt}"}]
 
     for msg in recent_history:
@@ -118,7 +118,7 @@ def generate_offline_coach_response(query: str, profile: Dict[str, Any]) -> str:
     goal = profile.get("fitness_goal", "fitness")
     weight = profile.get("weight") or profile.get("weight_kg", 70.0)
 
-    disclaimer_note = "\n\n> 💡 *Note: Operating in smart offline coaching mode. Add an OpenAI API key in the sidebar for live GPT-4o-mini generation.*"
+    disclaimer_note = "\n\n> 💡 *Note: Operating in smart offline coaching mode. Add a Gemini API key in the sidebar for live Gemini generation.*"
 
     if any(w in q for w in ["sore", "soreness", "doms", "stiff", "ache"]):
         return (
@@ -211,6 +211,6 @@ def get_coach_response(
 
     return (
         "I'm here to help with your workouts, nutrition, recovery, and fitness habits! "
-        "Please check that your OpenAI API key is configured to receive personalized responses."
+        "Please check that your Gemini API key is configured in Render environment variables or the sidebar."
     )
 

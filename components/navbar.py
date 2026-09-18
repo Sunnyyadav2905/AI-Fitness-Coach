@@ -18,7 +18,7 @@ def render_navbar(user: Dict[str, Any], ai_active: bool = False) -> None:
         )
 
     with col2:
-        badge_text = "🟢 OpenAI Connected" if ai_active else "🟡 Smart Offline Mode"
+        badge_text = "🟢 Gemini Connected" if ai_active else "🟡 Smart Offline Mode"
         badge_color = "#059669" if ai_active else "#d97706"
         st.markdown(
             f"<div style='text-align:right; margin-top:6px;'>"

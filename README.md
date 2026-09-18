@@ -4,9 +4,9 @@
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-FF4B4B.svg)](https://streamlit.io/)
-[![OpenAI GPT](https://img.shields.io/badge/OpenAI-GPT--4o--mini-green.svg)](https://platform.openai.com/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini%201.5%20Flash-4285F4.svg)](https://aistudio.google.com/)
 [![Database](https://img.shields.io/badge/Database-SQLite3-lightgrey.svg)](https://www.sqlite.org/)
-[![Tests](https://img.shields.io/badge/Tests-pytest%20Passing-brightgreen.svg)](https://docs.pytest.org/)
+[![Tests](https://img.shields.io/badge/Tests-33%20pytest%20Passing-brightgreen.svg)](https://docs.pytest.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -37,7 +37,7 @@ In the modern digital health landscape, individuals pursuing personal fitness an
 3. **Data Fragmentation:** Fitness enthusiasts frequently juggle multiple disjointed tools — one for calorie logging, another for workout recording, a third for step tracking, and web search for training advice.
 4. **Misinformation & Lack of Safety Checks:** Online forums and social media offer contradictory fitness advice, often without necessary medical safety warnings or emergency safeguards.
 
-**AI FitCoach** addresses this challenge by delivering a unified, free, and adaptive personal fitness web platform that combines validated exercise physiology algorithms (Mifflin-St Jeor BMR, WHO BMI standards, macro distribution models) with Large Language Models (OpenAI GPT-4o-mini). It offers dynamic workout splits, tailored nutritional meal plans, real-time interactive coaching with emergency safety detection, and longitudinal progress tracking.
+**AI FitCoach** addresses this challenge by delivering a unified, free, and adaptive personal fitness web platform that combines validated exercise physiology algorithms (Mifflin-St Jeor BMR, WHO BMI standards, macro distribution models) with Large Language Models (Google Gemini 1.5 Flash via `google-genai`). It offers dynamic workout splits, tailored nutritional meal plans, real-time interactive coaching with emergency safety detection, and longitudinal progress tracking.
 
 ---
 
@@ -57,7 +57,7 @@ flowchart TD
         subgraph LogicServices["Core Service Modules"]
             BMIEngine["Metabolic Engine (Mifflin-St Jeor, WHO BMI)"]
             Validators["Data Sanitization & Input Validators"]
-            AIEngine["OpenAI GPT-4o-mini Integration Client"]
+            AIEngine["Google Gemini Integration Client (google-genai)"]
         end
         
         subgraph AIPipelines["AI Specialized Generators"]
@@ -70,7 +70,7 @@ flowchart TD
 
     subgraph DataTier["Persistence Tier & External APIs"]
         SQLite[("SQLite3 Database\n(fitcoach.db)")]
-        OpenAIAPI["OpenAI Cloud LLM API"]
+        GeminiAPI["Google Gemini Cloud LLM API"]
     end
 
     UI --> Router
@@ -81,13 +81,13 @@ flowchart TD
     AuthModule --> SQLite
     LogicServices --> SQLite
     AIPipelines --> SQLite
-    AIPipelines --> OpenAIAPI
+    AIPipelines --> GeminiAPI
 ```
 
 ### Architectural Highlights
 - **Three-Tier Architecture:** Decoupled presentation (`pages/`, `components/`), business/AI logic (`ai/`, `utils/`, `auth/`), and data storage (`database/`).
 - **Context-Aware LLM Pipelines:** Prompts dynamically inject user biometric profiles (age, height, weight, target weight, activity multiplier, diet style, injuries) into system instructions.
-- **Fail-Safe Offline Operation:** If OpenAI API credentials are unavailable or rate-limited, the system falls back gracefully to deterministic rule-based generators and notifies the user via status badges.
+- **Fail-Safe Offline Operation:** If Gemini API credentials are unavailable or rate-limited, the system falls back gracefully to deterministic rule-based generators and notifies the user via status badges.
 
 ---
 
@@ -98,7 +98,7 @@ flowchart TD
 | **Presentation** | Web Application Framework | `Streamlit >= 1.32.0` | Responsive multi-page UI with dark-mode styling |
 | **Visualizations**| Data Charts | `Plotly >= 5.19.0` | Dark-themed interactive time-series & adherence gauges |
 | **Data Processing**| Analytics | `Pandas >= 2.2.0` | Log dataframes, statistical aggregations, CSV exports |
-| **AI Integration**| LLM API Client | `OpenAI >= 1.14.0` | GPT-4o-mini / GPT-3.5-turbo workout, diet, & coach responses |
+| **AI Integration**| LLM API Client | `google-genai >= 2.24.0` | Gemini 1.5 Flash workout, diet, & coach responses |
 | **Database** | Relational Database | `SQLite 3` (Built-in) | Serverless local storage; zero cloud database setup required |
 | **Security** | Password Hashing | `bcrypt >= 4.1.0` | Industry standard salted password hashing with fallbacks |
 | **Environment** | Secrets Management | `python-dotenv >= 1.0.1`| Local `.env` secret loading for secure API key handling |
@@ -132,7 +132,7 @@ AI-FitCoach/
 │
 ├── ai/                         # Artificial Intelligence & LLM Layer
 │   ├── __init__.py             # Exports AI generative services
-│   ├── openai_client.py        # Safe OpenAI API client, timeout handler, and key tester
+│   ├── gemini_client.py        # Safe Google Gemini API client, timeout handler, and key tester
 │   ├── workout_generator.py    # Generates structured split workout plans & saves to DB
 │   ├── diet_generator.py       # Generates 5-meal macronutrient diet schedules & saves to DB
 │   ├── chatbot.py              # Context-aware coach with emergency medical keywords gate
@@ -337,9 +337,10 @@ copy .env.example .env
 # macOS / Linux
 cp .env.example .env
 ```
-Open `.env` and set your OpenAI API key:
+Open `.env` and set your Google Gemini API key:
 ```env
-OPENAI_API_KEY=sk-proj-your-openai-api-key-here
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-1.5-flash
 APP_ENV=development
 DATABASE_PATH=database/fitcoach.db
 ```
@@ -356,7 +357,7 @@ The application will start and automatically open in your default browser at:
 
 ## 🧪 Running Automated Unit Tests
 
-AI FitCoach comes with a comprehensive unit test suite covering metabolic formulas, validators, authentication, and database operations.
+AI FitCoach comes with a comprehensive unit test suite covering metabolic formulas, validators, authentication, Gemini client handling, and database operations.
 
 Run the test suite using `pytest`:
 ```bash
@@ -365,89 +366,91 @@ pytest -v tests/
 
 ### Test Suite Summary:
 ```text
-tests/test_auth.py::test_password_hashing PASSED                         [  4%]
-tests/test_auth.py::test_register_and_authenticate PASSED                [  8%]
-tests/test_bmi.py::test_calculate_bmi_normal PASSED                      [ 13%]
-tests/test_bmi.py::test_calculate_bmi_underweight PASSED                 [ 17%]
-tests/test_bmi.py::test_calculate_bmi_overweight PASSED                  [ 21%]
-tests/test_bmi.py::test_calculate_bmi_obese PASSED                       [ 26%]
-tests/test_bmi.py::test_calculate_bmi_invalid_values PASSED              [ 30%]
-tests/test_bmi.py::test_calculate_bmi_and_category PASSED                [ 34%]
-tests/test_bmi.py::test_calculate_healthy_weight_range PASSED            [ 39%]
-tests/test_bmi.py::test_calculate_bmr PASSED                             [ 43%]
-tests/test_bmi.py::test_calculate_tdee PASSED                            [ 47%]
-tests/test_bmi.py::test_calculate_macro_targets PASSED                   [ 52%]
-tests/test_bmi.py::test_calculate_water_target PASSED                    [ 56%]
-tests/test_database.py::test_user_crud PASSED                            [ 60%]
-tests/test_database.py::test_profile_upsert PASSED                       [ 65%]
-tests/test_database.py::test_plans_crud PASSED                           [ 69%]
-tests/test_database.py::test_progress_logs PASSED                        [ 73%]
-tests/test_database.py::test_chat_history PASSED                         [ 78%]
-tests/test_validators.py::test_validate_email PASSED                     [ 82%]
-tests/test_validators.py::test_validate_username PASSED                  [ 86%]
-tests/test_validators.py::test_validate_password PASSED                  [ 91%]
-tests/test_validators.py::test_validate_numeric_range PASSED             [ 95%]
-tests/test_validators.py::test_specific_metrics_validation PASSED        [100%]
+tests/test_auth.py::test_password_hashing PASSED                         [  3%]
+tests/test_auth.py::test_register_and_authenticate PASSED                [  6%]
+tests/test_bmi.py::test_calculate_bmi_normal PASSED                      [  9%]
+tests/test_bmi.py::test_calculate_bmi_underweight PASSED                 [ 12%]
+tests/test_bmi.py::test_calculate_bmi_overweight PASSED                  [ 15%]
+tests/test_bmi.py::test_calculate_bmi_obese PASSED                       [ 18%]
+tests/test_bmi.py::test_calculate_bmi_invalid_values PASSED              [ 21%]
+tests/test_bmi.py::test_calculate_bmi_and_category PASSED                [ 24%]
+tests/test_bmi.py::test_calculate_healthy_weight_range PASSED            [ 27%]
+tests/test_bmi.py::test_calculate_bmr PASSED                             [ 30%]
+tests/test_bmi.py::test_calculate_tdee PASSED                            [ 33%]
+tests/test_bmi.py::test_calculate_macro_targets PASSED                   [ 36%]
+tests/test_bmi.py::test_calculate_water_target PASSED                    [ 39%]
+tests/test_database.py::test_user_crud PASSED                            [ 42%]
+tests/test_database.py::test_profile_upsert PASSED                       [ 45%]
+tests/test_database.py::test_plans_crud PASSED                           [ 48%]
+tests/test_database.py::test_progress_logs PASSED                        [ 51%]
+tests/test_database.py::test_chat_history PASSED                         [ 54%]
+tests/test_gemini.py::test_is_gemini_configured PASSED                   [ 57%]
+tests/test_gemini.py::test_validate_api_key_empty PASSED                 [ 60%]
+tests/test_gemini.py::test_validate_api_key_too_short PASSED             [ 63%]
+tests/test_gemini.py::test_get_configured_model PASSED                   [ 66%]
+tests/test_gemini.py::test_generate_completion_without_key PASSED        [ 69%]
+tests/test_gemini.py::test_chatbot_emergency_detection PASSED            [ 72%]
+tests/test_gemini.py::test_chatbot_emergency_response_interception PASSED [ 75%]
+tests/test_gemini.py::test_workout_offline_fallback PASSED               [ 78%]
+tests/test_gemini.py::test_diet_offline_fallback PASSED                  [ 81%]
+tests/test_gemini.py::test_recommendations_offline_fallback PASSED       [ 84%]
+tests/test_validators.py::test_validate_email PASSED                     [ 87%]
+tests/test_validators.py::test_validate_username PASSED                  [ 90%]
+tests/test_validators.py::test_validate_password PASSED                  [ 93%]
+tests/test_validators.py::test_validate_numeric_range PASSED             [ 96%]
+tests/test_specific_metrics_validation PASSED                            [100%]
 
-============================= 23 passed in 2.48s ==============================
+============================= 33 passed in 2.44s ==============================
 ```
 
 ---
 
-## ☁️ Cloud Deployment Guide
+## ☁️ Production Deployment on Render
 
-> [!NOTE]
-> **Hosting Architecture Note (Vercel vs. Streamlit):**  
-> Vercel is a serverless platform optimized for static sites and stateless HTTP/WSGI functions (Next.js, Flask, FastAPI). Vercel attempts to load `app.py` as an ephemeral Serverless Function looking for an exported `app` or `handler` variable.  
-> However, **Streamlit is a stateful, long-running Python process** that relies on persistent bidirectional **WebSockets** (`/_stcore/stream`), in-memory session states (`st.session_state`), and local database transactions. It cannot run inside Vercel's 10-second stateless serverless containers.  
-> To run Streamlit in production, use platforms built for stateful web apps: **Streamlit Community Cloud** (official & free) or **Render** (containerized web service).
+Render provides persistent cloud containers with native WebSocket support required for Streamlit applications.
 
-### Option A: Deploy on Streamlit Community Cloud (Recommended — Free & Instant)
+### Option A: Using the Included Blueprint (`render.yaml`) (Recommended)
 
-Streamlit Community Cloud is the official, zero-configuration hosting platform built specifically for Streamlit apps.
-
-1. Push your repository to GitHub: `https://github.com/Sunnyyadav2905/AI-Fitness-Coach`
-2. Go to **[share.streamlit.io](https://share.streamlit.io/)** and sign in with your GitHub account.
-3. Click **"New app"** (or **"Create app"**).
-4. Fill in the deployment fields:
-   * **Repository:** `Sunnyyadav2905/AI-Fitness-Coach`
-   * **Branch:** `main`
-   * **Main file path:** `app.py`
-   * **App URL:** (Choose your custom subdomain, e.g. `ai-fitness-coach.streamlit.app`)
-5. *(Optional)* Click **"Advanced settings"** -> **"Secrets"**, and add your OpenAI key if you want live GPT-4o-mini generation enabled globally:
-   ```toml
-   OPENAI_API_KEY = "sk-..."
-   APP_ENV = "production"
-   ```
-   *(Note: If omitted, the app still runs 100% smoothly using the built-in Smart Offline Metabolic Engine!)*
-6. Click **"Deploy!"** Your app will be live with an SSL HTTPS link in ~1-2 minutes.
-
----
-
-### Option B: Deploy on Render (Web Service / Blueprints)
-
-Render provides persistent cloud containers with native WebSocket support.
-
-#### Method 1: Using the Included Blueprint (`render.yaml`)
 1. Sign in to **[render.com](https://render.com/)**.
 2. Click **"New +"** -> **"Blueprint"**.
 3. Select your repository `Sunnyyadav2905/AI-Fitness-Coach`.
-4. Render will automatically read `render.yaml`, configure Python 3.11.8, install `requirements.txt`, and start the app with:
-   `streamlit run app.py --server.port=$PORT --server.address=0.0.0.0`
-5. Click **"Apply"**.
-
-#### Method 2: Manual Web Service Setup
-1. Click **"New +"** -> **"Web Service"**.
-2. Connect your GitHub repository `Sunnyyadav2905/AI-Fitness-Coach`.
-3. Set the following fields:
-   * **Environment:** `Python 3`
+4. Render will automatically detect `render.yaml` and configure:
+   * **Service Type:** Web Service
+   * **Environment:** Python 3
    * **Build Command:** `pip install -r requirements.txt`
-   * **Start Command:** `streamlit run app.py --server.port=$PORT --server.address=0.0.0.0`
-4. Under **Environment Variables**, add:
-   * `PYTHON_VERSION`: `3.11.8`
-   * `APP_ENV`: `production`
-   * `OPENAI_API_KEY`: (Optional) `sk-...`
-5. Click **"Create Web Service"**.
+   * **Start Command:** `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+5. Under Environment Variables, input your secret:
+   * `GEMINI_API_KEY`: `<your-google-gemini-api-key>`
+6. Click **"Apply"** to deploy.
+
+---
+
+### Option B: Manual Web Service Setup on Render
+
+1. On Render, click **"New +"** -> **"Web Service"**.
+2. Connect your GitHub repository `Sunnyyadav2905/AI-Fitness-Coach`.
+3. Configure the service settings:
+   * **Name:** `ai-fitness-coach`
+   * **Region:** Any preferred region (e.g., Oregon, Frankfurt)
+   * **Branch:** `main`
+   * **Runtime:** `Python 3`
+   * **Build Command:** `pip install -r requirements.txt`
+   * **Start Command:** `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+4. Add Environment Variables:
+   * `PYTHON_VERSION` = `3.11.8`
+   * `APP_ENV` = `production`
+   * `GEMINI_API_KEY` = `<your-google-gemini-api-key>`
+   * `GEMINI_MODEL` = `gemini-1.5-flash`
+5. Click **"Deploy Web Service"**.
+
+---
+
+### Database Persistence Note for Render
+AI FitCoach uses SQLite (`database/fitcoach.db`). On Render's Free tier, the filesystem is ephemeral upon server restart.
+If you need persistent user records across restarts:
+* Attach a **Render Persistent Disk** mounted at `/data` and set the environment variable:
+  `DATABASE_PATH=/data/fitcoach.db`
+* Or configure an external PostgreSQL/Firebase instance if scaling to multi-instance cloud clusters.
 
 ---
 
@@ -470,7 +473,7 @@ Render provides persistent cloud containers with native WebSocket support.
 ## 🎓 Academic Project Details
 
 ### Abstract
-Physical inactivity, poor nutritional habits, and lack of personalized coaching contribute substantially to global lifestyle diseases. AI FitCoach presents an end-to-end software system engineered to democratize access to personalized health guidance. By synergizing deterministic exercise physiology models (Mifflin-St Jeor, Harris-Benedict, WHO classifications) with generative Large Language Models (OpenAI GPT-4o-mini), the application dynamically synthesizes adaptive workout splits, macro-calibrated meal schedules, and longitudinal progress recommendations. The platform incorporates parameterized relational persistence (SQLite), salted cryptographic authentication (bcrypt), interactive data analytics (Plotly), and automated testing (`pytest`).
+Physical inactivity, poor nutritional habits, and lack of personalized coaching contribute substantially to global lifestyle diseases. AI FitCoach presents an end-to-end software system engineered to democratize access to personalized health guidance. By synergizing deterministic exercise physiology models (Mifflin-St Jeor, Harris-Benedict, WHO classifications) with generative Large Language Models (Google Gemini 1.5 Flash), the application dynamically synthesizes adaptive workout splits, macro-calibrated meal schedules, and longitudinal progress recommendations. The platform incorporates parameterized relational persistence (SQLite), salted cryptographic authentication (bcrypt), interactive data analytics (Plotly), and automated testing (`pytest`).
 
 ### Methodology
 1. **Mathematical Modeling:** Strict implementation of validated metabolic algorithms to establish baseline caloric requirements and hydration minimums.

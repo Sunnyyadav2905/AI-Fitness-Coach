@@ -1,11 +1,11 @@
 """
 ai/diet_generator.py - AI Meal & Nutrition Plan Generator for AI-FitCoach
 Produces personalized macronutrient-balanced meal plans, hydration advice,
-and nutrition guidance using OpenAI GPT.
+and nutrition guidance using Google Gemini API.
 """
 
 from typing import Dict, Any, Optional, Tuple
-from ai.openai_client import generate_completion, DIET_SYSTEM_PROMPT
+from ai.gemini_client import generate_completion, DIET_SYSTEM_PROMPT
 from database import db
 from utils.constants import MEDICAL_DISCLAIMER
 
@@ -75,8 +75,8 @@ Create a personalized, evidence-based daily meal plan and nutrition guide for th
     if not success:
         offline_diet = generate_fallback_diet_plan(profile, preferences)
         final_plan = (
-            f"> 💡 **Offline Metabolic Engine Active**: Generated using nutritional physiology formulas because an active OpenAI API key was not detected. "
-            f"Add your API key in the sidebar anytime for real-time GPT-4o-mini generation.\n\n"
+            f"> 💡 **Offline Metabolic Engine Active**: Generated using nutritional physiology formulas because an active Gemini API key was not detected. "
+            f"Add your Gemini API key in the sidebar anytime for real-time Gemini generation.\n\n"
             f"{offline_diet}\n\n---\n\n{MEDICAL_DISCLAIMER}"
         )
     else:

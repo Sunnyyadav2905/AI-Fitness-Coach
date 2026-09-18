@@ -1,10 +1,10 @@
 """
 ai/workout_generator.py - AI Workout Plan Generator for AI-FitCoach
-Produces personalized, safe, and progressive weekly workout routines using OpenAI GPT.
+Produces personalized, safe, and progressive weekly workout routines using Google Gemini API.
 """
 
 from typing import Dict, Any, Optional, Tuple
-from ai.openai_client import generate_completion, WORKOUT_SYSTEM_PROMPT
+from ai.gemini_client import generate_completion, WORKOUT_SYSTEM_PROMPT
 from database import db
 from utils.constants import MEDICAL_DISCLAIMER
 
@@ -16,7 +16,7 @@ def generate_workout_plan(
     user_id: Optional[int] = None
 ) -> Tuple[bool, str]:
     """
-    Generates a personalized weekly workout plan using OpenAI GPT based on user profile & preferences.
+    Generates a personalized weekly workout plan using Google Gemini API based on user profile & preferences.
     Saves the plan to the SQLite database if user_id is provided.
     Returns (success: bool, plan_markdown: str).
     """
@@ -79,8 +79,8 @@ Please generate a comprehensive, highly personalized weekly workout plan based o
         # If API key is missing or quota exhausted, generate via smart offline engine
         offline_plan = generate_fallback_workout_plan(profile, preferences)
         final_plan = (
-            f"> 💡 **Offline Template Engine Active**: Generated using sports-science guidelines because an active OpenAI API key was not detected. "
-            f"Add your API key in the sidebar anytime for real-time GPT-4o-mini generation.\n\n"
+            f"> 💡 **Offline Template Engine Active**: Generated using sports-science guidelines because an active Gemini API key was not detected. "
+            f"Add your Gemini API key in the sidebar anytime for real-time Gemini generation.\n\n"
             f"{offline_plan}\n\n---\n\n{MEDICAL_DISCLAIMER}"
         )
     else:

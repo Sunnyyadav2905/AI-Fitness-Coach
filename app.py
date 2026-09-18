@@ -6,7 +6,7 @@ Generative AI Based Personal Fitness Assistant.
 import streamlit as st
 from database import db
 from auth import login_user, register_user
-from ai.openai_client import is_openai_configured
+from ai.gemini_client import is_gemini_configured
 from components.navbar import render_navbar
 from components.sidebar import render_sidebar
 from pages.dashboard import render_dashboard_page
@@ -152,7 +152,7 @@ def main():
         user = st.session_state.user
         profile = db.get_profile(user["id"]) or {}
 
-        ai_active = is_openai_configured(st.session_state.get("custom_api_key"))
+        ai_active = is_gemini_configured(st.session_state.get("custom_api_key"))
 
         # Top navigation header
         render_navbar(user, ai_active=ai_active)

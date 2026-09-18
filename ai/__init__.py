@@ -1,8 +1,8 @@
 """AI services package for AI-FitCoach."""
-from ai.openai_client import (
+from ai.gemini_client import (
     validate_api_key,
     generate_completion,
-    is_openai_configured,
+    is_gemini_configured,
     get_effective_api_key
 )
 from ai.workout_generator import generate_workout_plan, generate_workout_routine

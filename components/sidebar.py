@@ -4,7 +4,7 @@ components/sidebar.py - Sidebar Navigation & Settings Component for AI-FitCoach
 
 import streamlit as st
 from typing import Dict, Any
-from ai.openai_client import validate_api_key, is_openai_configured
+from ai.gemini_client import validate_api_key, is_gemini_configured
 from utils.constants import APP_NAME, APP_VERSION
 
 
@@ -72,13 +72,13 @@ def render_sidebar(user: Dict[str, Any], profile: Dict[str, Any]) -> str:
         st.markdown("<hr style='border-color: #334155; margin: 15px 0;'>", unsafe_allow_html=True)
 
         # AI API Configuration Expander
-        with st.expander("⚙️ OpenAI API Settings", expanded=False):
+        with st.expander("⚙️ Gemini API Settings", expanded=False):
             api_key_input = st.text_input(
-                "OpenAI API Key",
+                "Google Gemini API Key",
                 value=st.session_state.get("custom_api_key", ""),
                 type="password",
-                placeholder="sk-...",
-                help="Enter your personal OpenAI API key. Stored only in your local session."
+                placeholder="AIzaSy...",
+                help="Enter your personal Google Gemini API key. Stored only in your local session."
             )
 
             col_btn1, col_btn2 = st.columns(2)
@@ -100,10 +100,10 @@ def render_sidebar(user: Dict[str, Any], profile: Dict[str, Any]) -> str:
                     st.info("Cleared custom key.")
                     st.rerun()
 
-            if is_openai_configured(st.session_state.get("custom_api_key")):
-                st.caption("Status: 🟢 **OpenAI Live Connected**")
+            if is_gemini_configured(st.session_state.get("custom_api_key")):
+                st.caption("Status: 🟢 **Gemini Live Connected**")
             else:
-                st.caption("Status: 🟡 **Using Environment / Default Config**")
+                st.caption("Status: 🟡 **Using Environment / Offline Engine**")
 
         st.markdown("<hr style='border-color: #334155; margin: 15px 0;'>", unsafe_allow_html=True)
 

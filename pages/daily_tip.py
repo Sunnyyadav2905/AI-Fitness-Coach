@@ -7,7 +7,7 @@ import random
 from datetime import date
 from utils.constants import DAILY_TIPS_COLLECTION
 from components.cards import render_tip_card, render_quote_card
-from ai.openai_client import generate_completion, get_effective_api_key
+from ai.gemini_client import generate_completion, get_effective_api_key
 
 TIP_TOPICS = [
     "Exercise",

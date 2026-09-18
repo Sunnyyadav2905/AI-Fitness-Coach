@@ -61,7 +61,7 @@ def clean_markdown(text: str) -> str:
 
 
 def safe_api_output(raw_output: Any) -> str:
-    """Safely handles OpenAI API response outputs and returns clean markdown or fallback message."""
+    """Safely handles Gemini API response outputs and returns clean markdown or fallback message."""
     if not raw_output:
         return "No response generated. Please check your prompt and try again."
     cleaned = clean_markdown(str(raw_output))

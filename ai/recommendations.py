@@ -1,11 +1,11 @@
 """
 ai/recommendations.py - Progress Analysis & Adaptive Recommendations for AI-FitCoach
 Evaluates historical progress metrics (weight, water, sleep, steps, calories, workouts)
-and provides data-backed, encouraging weekly modifications using OpenAI GPT.
+and provides data-backed, encouraging weekly modifications using Google Gemini API.
 """
 
 from typing import List, Dict, Any, Optional, Tuple
-from ai.openai_client import generate_completion, RECOMMENDATION_SYSTEM_PROMPT
+from ai.gemini_client import generate_completion, RECOMMENDATION_SYSTEM_PROMPT
 from utils.constants import MEDICAL_DISCLAIMER
 
 
@@ -116,7 +116,7 @@ Analyze the recent progress data for {name} and provide actionable, encouraging 
         )
         final_rec = (
             f"> 💡 **Offline Progress Intelligence**: Generated via statistical trend analysis. "
-            f"Add an OpenAI API key in the sidebar for live GPT-4o-mini generation.\n\n"
+            f"Add a Gemini API key in the sidebar for live Gemini generation.\n\n"
             f"{offline_rec}\n\n---\n\n{MEDICAL_DISCLAIMER}"
         )
     else:

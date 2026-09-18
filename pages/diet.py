@@ -6,7 +6,7 @@ import streamlit as st
 from datetime import date
 from typing import Dict, Any
 from database import db
-from ai.openai_client import is_openai_configured
+from ai.gemini_client import is_gemini_configured
 from ai.diet_generator import generate_diet_plan
 from utils.constants import DIETARY_PREFERENCES
 
@@ -15,7 +15,7 @@ def render_diet_page(user: Dict[str, Any], profile: Dict[str, Any]) -> None:
     """Renders the diet plan generation and saved diet library view."""
     user_id = user["id"]
     custom_key = st.session_state.get("custom_api_key", None)
-    ai_online = is_openai_configured(custom_key)
+    ai_online = is_gemini_configured(custom_key)
 
     st.title("🥗 Diet Generator")
     st.caption("Formulate personalized, macronutrient-balanced meal plans tailored to your lifestyle and dietary needs.")
@@ -41,9 +41,9 @@ def render_diet_page(user: Dict[str, Any], profile: Dict[str, Any]) -> None:
             )
 
         if ai_online:
-            st.caption("🟢 **AI Engine Active:** OpenAI GPT-4o-mini")
+            st.caption("🟢 **AI Engine Active:** Google Gemini (gemini-1.5-flash)")
         else:
-            st.caption("🟡 **Engine Mode:** Offline Metabolic Engine (Enter OpenAI API key in sidebar to enable live GPT-4o-mini)")
+            st.caption("🟡 **Engine Mode:** Offline Metabolic Engine (Enter Gemini API key in sidebar to enable live Gemini)")
 
         if st.button("🚀 Generate Personalized Diet Suggestions", type="primary", use_container_width=True):
             preferences = {
