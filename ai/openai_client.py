@@ -41,10 +41,21 @@ RECOMMENDATION_SYSTEM_PROMPT = (
 
 
 def get_effective_api_key(custom_key: Optional[str] = None) -> str:
-    """Returns the custom key if provided, else reads from environment."""
+    """Returns the custom key if provided, else reads from environment or Streamlit secrets."""
     if custom_key and custom_key.strip():
         return custom_key.strip()
-    return os.getenv("OPENAI_API_KEY", "").strip()
+    env_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if env_key:
+        return env_key
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "OPENAI_API_KEY" in st.secrets:
+            sec_val = str(st.secrets["OPENAI_API_KEY"]).strip()
+            if sec_val:
+                return sec_val
+    except Exception:
+        pass
+    return ""
 
 
 def is_openai_configured(custom_key: Optional[str] = None) -> bool:
@@ -90,6 +101,22 @@ def validate_api_key(api_key: str) -> Tuple[bool, str]:
         return False, f"API test connection failed: {err_msg}"
 
 
+def get_configured_model() -> str:
+    """Returns the model name from env, st.secrets, or defaults to gpt-4o-mini."""
+    env_model = os.getenv("OPENAI_MODEL", "").strip()
+    if env_model:
+        return env_model
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "OPENAI_MODEL" in st.secrets:
+            sec_m = str(st.secrets["OPENAI_MODEL"]).strip()
+            if sec_m:
+                return sec_m
+    except Exception:
+        pass
+    return "gpt-4o-mini"
+
+
 def generate_completion(
     prompt: str,
     system_message: str = CHATBOT_SYSTEM_PROMPT,
@@ -107,7 +134,7 @@ def generate_completion(
     if not effective_key:
         return False, "OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env file or enter it in the sidebar."
 
-    chosen_model = model or DEFAULT_MODEL
+    chosen_model = model or get_configured_model()
 
     try:
         client = get_openai_client(effective_key)

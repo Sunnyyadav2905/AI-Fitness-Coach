@@ -1,0 +1,15 @@
+# Prevent Vercel from treating Streamlit entrypoint as an AWS Lambda Serverless Function
+app.py
+ai/
+auth/
+components/
+database/
+pages/
+utils/
+data/
+tests/
+.streamlit/
+requirements.txt
+runtime.txt
+Procfile
+render.yaml
